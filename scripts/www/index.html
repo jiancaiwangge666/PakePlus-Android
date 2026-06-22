@@ -1,0 +1,1895 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="慕闻心璨">
+<title>慕闻心璨</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💙</text></svg>">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a1628;
+    --bg2: #0f2340;
+    --card: rgba(255,255,255,0.06);
+    --card-hover: rgba(255,255,255,0.10);
+    --border: rgba(255,255,255,0.08);
+    --purple: #0ea5e9;
+    --purple-light: #38bdf8;
+    --pink: #10b981;
+    --gold: #fbbf24;
+    --white: #f0fdf8;
+    --gray: #8ea8b8;
+    --gray-dark: #1e3a4d;
+    --text: #e0eef5;
+    --success: #22c55e;
+    --danger: #f87171;
+    --orange: #fb923c;
+    --blue: #38bdf8;
+    --radius: 14px;
+    --radius-sm: 10px;
+    --nav-h: 64px;
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html { scroll-behavior: smooth; font-size: 16px; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    overflow-x: hidden;
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    user-select: none;
+  }
+
+  /* ---- App Shell ---- */
+  .app {
+    max-width: 480px;
+    margin: 0 auto;
+    min-height: 100vh;
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(180deg, #0a1628 0%, #0f2340 30%, #0a1628 100%);
+  }
+
+  /* ---- Page Backgrounds ---- */
+  .page {
+    display: none; padding: 0 16px;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    position: relative;
+    min-height: calc(100vh - var(--nav-h) - 80px);
+  }
+  .page.active { display: block; animation: fadeUp 0.3s ease; }
+  .page.has-page-bg::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .page.has-page-bg > * { position: relative; z-index: 1; }
+  .page .overlay-tint {
+    display: none;
+    position: fixed; inset: 0;
+    background: linear-gradient(180deg, rgba(10,22,40,0.82) 0%, rgba(15,35,64,0.72) 30%, rgba(10,22,40,0.85) 100%);
+    z-index: 0; pointer-events: none;
+  }
+  .page.has-page-bg .overlay-tint { display: block; }
+
+  /* ---- Header ---- */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    padding: 48px 20px 16px;
+    background: linear-gradient(180deg, #0a1628 60%, transparent);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    backdrop-filter: blur(10px);
+  }
+  .header-title {
+    font-size: 1.4rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, #38bdf8, #10b981);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    letter-spacing: 0.03em;
+  }
+  .header-actions { display: flex; gap: 12px; }
+  .icon-btn {
+    width: 38px; height: 38px;
+    border-radius: 50%;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-size: 1.1rem;
+    display: flex; align-items: center; justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .icon-btn:active { transform: scale(0.93); background: var(--card-hover); }
+
+  /* ---- Page Container ---- */
+  .pages { padding-bottom: calc(var(--nav-h) + var(--safe-bottom) + 16px); }
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(12px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  /* ---- Search ---- */
+  .search-wrap {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .search-box {
+    flex: 1; display: flex; align-items: center; gap: 8px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 10px 14px;
+  }
+  .search-box input {
+    flex: 1; background: none; border: none; color: var(--text);
+    font-size: 0.9rem; outline: none; font-family: inherit;
+  }
+  .search-box input::placeholder { color: var(--gray); }
+  .search-box .s-icon { color: var(--gray); font-size: 1rem; }
+
+  /* ---- Category Pills ---- */
+  .cat-scroll {
+    display: flex; gap: 8px; overflow-x: auto;
+    padding-bottom: 8px; margin-bottom: 16px;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+  }
+  .cat-scroll::-webkit-scrollbar { display: none; }
+  .cat-pill {
+    flex-shrink: 0;
+    padding: 7px 16px;
+    border-radius: 50px;
+    font-size: 0.82rem;
+    font-weight: 500;
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--gray);
+    cursor: pointer;
+    transition: all 0.2s;
+    white-space: nowrap;
+  }
+  .cat-pill.active {
+    background: var(--purple);
+    border-color: var(--purple);
+    color: #fff;
+    box-shadow: 0 4px 12px rgba(14,165,233,0.3);
+  }
+
+  /* ---- Dish Card Grid ---- */
+  .dish-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+  }
+  .dish-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+  }
+  .dish-card:active { transform: scale(0.97); background: var(--card-hover); }
+  .dish-card-img {
+    height: 100px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 3rem;
+    background: linear-gradient(135deg, rgba(14,165,233,0.15), rgba(16,185,129,0.1));
+    position: relative;
+  }
+  .dish-card.selected .dish-card-img::after {
+    content: '✓';
+    position: absolute;
+    top: 8px; right: 8px;
+    width: 24px; height: 24px;
+    background: var(--purple);
+    color: #fff;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 700;
+  }
+  .dish-card-body { padding: 12px; }
+  .dish-card-body h3 {
+    font-size: 0.9rem; font-weight: 600; margin-bottom: 6px;
+    display: -webkit-box; -webkit-line-clamp: 1; -webkit-box-orient: vertical; overflow: hidden;
+  }
+  .dish-card-body .tags {
+    display: flex; gap: 4px; flex-wrap: wrap;
+  }
+  .tag {
+    font-size: 0.68rem; padding: 2px 8px; border-radius: 50px;
+    font-weight: 500;
+  }
+  .tag-spicy  { background: rgba(251,146,60,0.2);  color: var(--orange); }
+  .tag-sweet  { background: rgba(232,121,160,0.2); color: var(--pink); }
+  .tag-savory { background: rgba(240,192,96,0.2);  color: var(--gold); }
+  .tag-fresh  { background: rgba(52,211,153,0.2);  color: var(--success); }
+  .tag-nutty  { background: rgba(167,139,250,0.2); color: var(--purple-light); }
+  .tag-common { background: rgba(155,142,175,0.2); color: var(--gray); }
+  .dish-card .cat-badge {
+    position: absolute; top: 8px; left: 8px;
+    font-size: 0.65rem; padding: 3px 8px; border-radius: 50px;
+    background: rgba(0,0,0,0.5); color: var(--gray);
+    backdrop-filter: blur(4px);
+  }
+  .dish-card .dish-actions {
+    display: flex; gap: 4px; margin-top: 8px;
+  }
+  .dish-card .mini-btn {
+    flex: 1; padding: 5px 8px; border-radius: 6px; border: 1px solid var(--border);
+    background: var(--card); color: var(--gray); font-size: 0.7rem;
+    cursor: pointer; text-align: center; transition: all 0.15s;
+    font-family: inherit;
+  }
+  .dish-card .mini-btn:active { background: var(--purple); color:#fff; border-color: var(--purple); }
+  .dish-card .mini-btn.danger:active { background: var(--danger); border-color: var(--danger); }
+
+  /* ---- Meal Plan ---- */
+  .meal-section { margin-bottom: 20px; }
+  .meal-section h3 {
+    font-size: 0.85rem; color: var(--gray); margin-bottom: 10px;
+    display: flex; align-items: center; gap: 6px;
+  }
+  .meal-section h3 .count { color: var(--purple-light); font-weight: 700; }
+  .meal-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 12px 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 8px;
+  }
+  .meal-item .dish-emoji { font-size: 2rem; }
+  .meal-item .dish-info { flex: 1; min-width: 0; }
+  .meal-item .dish-info .name { font-size: 0.9rem; font-weight: 600; }
+  .meal-item .dish-info .meta { font-size: 0.75rem; color: var(--gray); margin-top: 2px; }
+  .serving-ctrl {
+    display: flex; align-items: center; gap: 6px;
+  }
+  .serving-ctrl button {
+    width: 28px; height: 28px; border-radius: 50%;
+    border: 1px solid var(--border); background: var(--card);
+    color: var(--text); font-size: 1rem; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.15s;
+  }
+  .serving-ctrl button:active { background: var(--purple); border-color: var(--purple); }
+  .serving-ctrl .num { font-size: 0.9rem; font-weight: 600; min-width: 20px; text-align: center; }
+
+  /* ---- Shopping List ---- */
+  .shop-progress {
+    display: flex; align-items: center; gap: 12px;
+    margin-bottom: 20px; padding: 14px 16px;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius);
+  }
+  .progress-bar {
+    flex: 1; height: 6px; background: var(--gray-dark); border-radius: 3px; overflow: hidden;
+  }
+  .progress-bar .fill {
+    height: 100%; background: linear-gradient(90deg, var(--purple), var(--pink));
+    border-radius: 3px; transition: width 0.3s;
+  }
+  .progress-text { font-size: 0.8rem; color: var(--gray); white-space: nowrap; }
+
+  .shop-group { margin-bottom: 18px; }
+  .shop-group h4 {
+    font-size: 0.82rem; color: var(--purple-light);
+    margin-bottom: 8px; display: flex; align-items: center; gap: 6px;
+  }
+  .shop-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 11px 14px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    margin-bottom: 6px; transition: all 0.2s;
+  }
+  .shop-item.checked { opacity: 0.45; }
+  .shop-item.checked .shop-name { text-decoration: line-through; }
+  .shop-cb {
+    appearance: none; -webkit-appearance: none;
+    width: 22px; height: 22px; border-radius: 6px;
+    border: 2px solid var(--gray-dark); flex-shrink: 0;
+    cursor: pointer; transition: all 0.2s; position: relative;
+  }
+  .shop-cb:checked {
+    background: var(--success); border-color: var(--success);
+  }
+  .shop-cb:checked::after {
+    content: ''; position: absolute; top: 2px; left: 6px;
+    width: 5px; height: 10px; border: solid #fff;
+    border-width: 0 2px 2px 0; transform: rotate(45deg);
+  }
+  .shop-name { flex: 1; font-size: 0.88rem; }
+  .shop-from { font-size: 0.7rem; color: var(--gray); }
+  .shop-del {
+    width: 26px; height: 26px; border-radius: 50%;
+    border: none; background: transparent; color: var(--gray);
+    font-size: 0.85rem; cursor: pointer; display: flex;
+    align-items: center; justify-content: center;
+  }
+  .shop-del:active { color: var(--danger); background: rgba(248,113,113,0.1); }
+
+  .add-shop-row {
+    display: flex; gap: 8px; margin-top: 16px;
+  }
+  .add-shop-row input {
+    flex: 1; padding: 10px 14px; border-radius: var(--radius-sm);
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.85rem; outline: none; font-family: inherit;
+  }
+  .add-shop-row select {
+    width: 80px; padding: 10px; border-radius: var(--radius-sm);
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.8rem; outline: none; font-family: inherit;
+  }
+  .add-shop-row .btn-sm {
+    padding: 10px 16px; background: var(--purple); color: #fff;
+    border: none; border-radius: var(--radius-sm); font-weight: 600;
+    cursor: pointer; font-family: inherit; font-size: 0.82rem;
+    white-space: nowrap;
+  }
+  .add-shop-row .btn-sm:active { background: #0284c7; }
+
+  /* ---- My Page ---- */
+  .my-avatar {
+    width: 80px; height: 80px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    display: flex; align-items: center; justify-content: center;
+    font-size: 2.5rem; margin: 16px auto;
+  }
+  .my-name {
+    text-align: center; font-size: 1.2rem; font-weight: 700; margin-bottom: 4px;
+  }
+  .my-subtitle { text-align: center; font-size: 0.82rem; color: var(--gray); margin-bottom: 24px; }
+  .stat-row {
+    display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px;
+    margin-bottom: 24px;
+  }
+  .stat-box {
+    text-align: center; padding: 16px 8px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+  }
+  .stat-box .num { font-size: 1.6rem; font-weight: 700; color: var(--purple-light); }
+  .stat-box .lbl { font-size: 0.72rem; color: var(--gray); margin-top: 2px; }
+
+  .my-menu { display: flex; flex-direction: column; gap: 8px; }
+  .my-item {
+    display: flex; align-items: center; gap: 12px;
+    padding: 14px 16px; background: var(--card);
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    cursor: pointer; transition: all 0.15s; font-size: 0.9rem;
+  }
+  .my-item:active { background: var(--card-hover); }
+  .my-item .arrow { margin-left: auto; color: var(--gray); }
+
+  /* ---- Bottom Nav ---- */
+  .bottom-nav {
+    position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 100%; max-width: 480px;
+    height: var(--nav-h);
+    padding-bottom: var(--safe-bottom);
+    background: rgba(10,22,40,0.95);
+    backdrop-filter: blur(20px);
+    border-top: 1px solid var(--border);
+    display: flex; z-index: 100;
+  }
+  .nav-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    gap: 2px; cursor: pointer; color: var(--gray);
+    transition: all 0.2s; font-size: 0.62rem;
+    -webkit-tap-highlight-color: transparent;
+    border: none; background: none; font-family: inherit;
+  }
+  .nav-item .nav-icon { font-size: 1.15rem; transition: all 0.2s; }
+  .nav-item.active { color: var(--purple-light); }
+  .nav-item.active .nav-icon { transform: scale(1.1); }
+  .nav-badge {
+    position: absolute; top: 4px; margin-left: 18px;
+    min-width: 18px; height: 18px; border-radius: 50%;
+    background: var(--pink); color: #fff;
+    font-size: 0.62rem; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ---- Modal ---- */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 200;
+    background: rgba(0,0,0,0.6); display: none;
+    align-items: flex-end; justify-content: center;
+    backdrop-filter: blur(4px);
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    width: 100%; max-width: 480px; max-height: 85vh;
+    background: #0f2340; border-radius: 20px 20px 0 0;
+    padding: 24px 20px 32px; overflow-y: auto;
+    animation: slideUp 0.3s ease;
+  }
+  @keyframes slideUp {
+    from { transform: translateY(100%); }
+    to   { transform: translateY(0); }
+  }
+  .modal h3 { font-size: 1.1rem; margin-bottom: 16px; text-align: center; }
+  .form-group { margin-bottom: 14px; }
+  .form-group label {
+    display: block; font-size: 0.8rem; color: var(--gray); margin-bottom: 6px;
+  }
+  .form-group input, .form-group select, .form-group textarea {
+    width: 100%; padding: 10px 14px; border-radius: var(--radius-sm);
+    background: var(--card); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.9rem; outline: none; font-family: inherit;
+    resize: vertical;
+  }
+  .form-group input:focus, .form-group textarea:focus {
+    border-color: var(--purple);
+  }
+  .form-group textarea { font-size: 0.82rem; min-height: 60px; }
+  .form-row { display: flex; gap: 8px; }
+  .form-row .btn {
+    flex: 1; padding: 12px; border-radius: var(--radius-sm);
+    font-weight: 600; cursor: pointer; border: none; font-family: inherit;
+    font-size: 0.9rem; transition: all 0.15s;
+  }
+  .btn-confirm { background: var(--purple); color: #fff; }
+  .btn-confirm:active { background: #0284c7; }
+  .btn-cancel { background: var(--card); color: var(--gray); border: 1px solid var(--border); }
+  .btn-cancel:active { background: var(--card-hover); }
+
+  /* ---- Toast ---- */
+  .toast {
+    position: fixed; top: 60px; left: 50%; transform: translateX(-50%);
+    z-index: 300; padding: 10px 24px; border-radius: 50px;
+    background: var(--purple); color: #fff; font-size: 0.85rem;
+    font-weight: 600; pointer-events: none;
+    opacity: 0; transition: opacity 0.3s;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  }
+  .toast.show { opacity: 1; }
+
+  /* ---- Grudge Notebook ---- */
+  .grudge-header-bar {
+    display: flex; gap: 8px; margin-bottom: 16px;
+  }
+  .grudge-header-bar .btn-sm {
+    padding: 8px 14px; border-radius: 50px;
+    font-size: 0.78rem; font-weight: 600; cursor: pointer;
+    border: 1px solid var(--border); background: var(--card);
+    color: var(--gray); font-family: inherit;
+    transition: all 0.2s;
+  }
+  .grudge-header-bar .btn-sm.active {
+    background: var(--purple); color: #fff; border-color: var(--purple);
+  }
+  .grudge-list { display: flex; flex-direction: column; gap: 10px; }
+  .grudge-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: var(--radius); padding: 16px;
+    transition: all 0.2s; position: relative;
+  }
+  .grudge-card.resolved { opacity: 0.5; border-color: rgba(255,255,255,0.03); }
+  .grudge-card .grudge-header {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+  }
+  .grudge-card .grudge-severity { font-size: 1.3rem; }
+  .grudge-card .grudge-title { font-weight: 700; font-size: 0.9rem; flex: 1; }
+  .grudge-card .grudge-date { font-size: 0.7rem; color: var(--gray); }
+  .grudge-card .grudge-desc {
+    font-size: 0.82rem; color: var(--gray);
+    margin-bottom: 10px; line-height: 1.5;
+  }
+  .grudge-card .grudge-actions {
+    display: flex; gap: 6px;
+  }
+  .grudge-card .grudge-actions button {
+    padding: 5px 12px; border-radius: 50px; border: 1px solid var(--border);
+    background: var(--card); color: var(--gray); font-size: 0.72rem;
+    cursor: pointer; font-family: inherit; transition: all 0.15s;
+  }
+  .grudge-card .grudge-actions button.forgive:active {
+    background: var(--success); color: #fff; border-color: var(--success);
+  }
+  .grudge-card .grudge-actions button.del:active {
+    background: var(--danger); color: #fff; border-color: var(--danger);
+  }
+  .grudge-card .forgiven-badge {
+    position: absolute; top: 12px; right: 12px;
+    font-size: 0.7rem; background: var(--success); color: #fff;
+    padding: 3px 10px; border-radius: 50px; font-weight: 600;
+  }
+  /* Comments */
+  .grudge-comments { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .grudge-comment {
+    padding: 6px 0; font-size: 0.8rem; display: flex; gap: 8px; align-items: flex-start;
+  }
+  .grudge-comment .cmt-author {
+    font-weight: 600; color: var(--purple-light); white-space: nowrap; font-size: 0.75rem;
+  }
+  .grudge-comment .cmt-text { color: var(--gray); flex: 1; font-size: 0.8rem; }
+  .grudge-comment .cmt-time { font-size: 0.65rem; color: var(--gray-dark); white-space: nowrap; }
+  .comment-input-row {
+    display: flex; gap: 6px; margin-top: 8px;
+  }
+  .comment-input-row input {
+    flex: 1; padding: 7px 10px; border-radius: 20px;
+    background: rgba(255,255,255,0.05); border: 1px solid var(--border);
+    color: var(--text); font-size: 0.78rem; outline: none; font-family: inherit;
+  }
+  .comment-input-row input:focus { border-color: var(--purple); }
+  .comment-input-row button {
+    padding: 7px 14px; border-radius: 20px; border: none;
+    background: var(--purple); color: #fff; font-size: 0.75rem;
+    font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap;
+  }
+
+  /* ---- Empty State ---- */
+  .empty {
+    text-align: center; padding: 60px 20px; color: var(--gray);
+  }
+  .empty .icon { font-size: 3.5rem; margin-bottom: 12px; display: block; }
+  .empty p { font-size: 0.9rem; }
+
+  /* ---- FAB ---- */
+  .fab {
+    position: fixed; bottom: calc(var(--nav-h) + var(--safe-bottom) + 20px);
+    right: calc(50% - 240px + 20px);
+    width: 50px; height: 50px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--purple), var(--pink));
+    color: #fff; font-size: 1.6rem; border: none;
+    cursor: pointer; z-index: 80;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 20px rgba(14,165,233,0.4);
+    transition: all 0.2s;
+  }
+  .fab:active { transform: scale(0.9); }
+  @media (min-width: 481px) {
+    .fab { right: calc(50% - 220px); }
+  }
+  @media (max-width: 480px) {
+    .fab { right: 20px; }
+  }
+
+  /* ---- Responsive ---- */
+  @media (min-width: 481px) {
+    .app { border-left: 1px solid var(--border); border-right: 1px solid var(--border); }
+  }
+
+  /* ---- Crop Modal ---- */
+  .crop-overlay {
+    position: fixed; inset: 0; z-index: 400;
+    background: #000; display: none;
+    flex-direction: column;
+  }
+  .crop-overlay.open { display: flex; }
+  .crop-toolbar {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 16px; background: rgba(0,0,0,0.85);
+    color: #fff; z-index: 2;
+  }
+  .crop-toolbar button {
+    padding: 8px 18px; border-radius: 20px; border: none;
+    font-size: 0.85rem; font-weight: 600; cursor: pointer; font-family: inherit;
+  }
+  .crop-toolbar .crop-cancel { background: rgba(255,255,255,0.15); color: #fff; }
+  .crop-toolbar .crop-done { background: var(--purple); color: #fff; }
+  .crop-canvas-wrap {
+    flex: 1; position: relative; overflow: hidden;
+    touch-action: none;
+  }
+  .crop-canvas-wrap img {
+    position: absolute;
+    transform-origin: 0 0;
+    user-select: none;
+    -webkit-user-drag: none;
+  }
+  .crop-frame {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 90%; max-width: 400px;
+    aspect-ratio: 9 / 16;
+    border: 2px dashed rgba(255,255,255,0.7);
+    pointer-events: none;
+    box-shadow: 0 0 0 9999px rgba(0,0,0,0.55);
+  }
+  .crop-zoom-bar {
+    display: flex; align-items: center; gap: 10px;
+    padding: 14px 20px; background: rgba(0,0,0,0.85);
+  }
+  .crop-zoom-bar input[type=range] {
+    flex: 1; accent-color: var(--purple);
+  }
+  .crop-zoom-bar span { color: #fff; font-size: 0.82rem; }
+</style>
+</head>
+<body>
+<div class="app" id="app">
+  <!-- Header -->
+  <div class="header">
+    <span class="header-title" id="headerTitle">🍽️ 菜单</span>
+    <div class="header-actions">
+      <button class="icon-btn" id="btnSearch" title="搜索">🔍</button>
+      <button class="icon-btn" id="btnAddDish" title="添加菜品">＋</button>
+    </div>
+  </div>
+
+  <!-- Pages -->
+  <div class="pages">
+
+    <!-- ====== TAB 1: 菜单 ====== -->
+    <div class="page active" id="page-menu">
+      <div class="search-wrap">
+        <div class="search-box">
+          <span class="s-icon">🔍</span>
+          <input type="text" id="searchInput" placeholder="搜索菜品..." autocomplete="off">
+        </div>
+      </div>
+      <div class="cat-scroll" id="catScroll">
+        <button class="cat-pill active" data-cat="全部">全部</button>
+        <button class="cat-pill" data-cat="荤菜">🥩 荤菜</button>
+        <button class="cat-pill" data-cat="素菜">🥬 素菜</button>
+        <button class="cat-pill" data-cat="汤">🍲 汤</button>
+        <button class="cat-pill" data-cat="甜品">🍰 甜品</button>
+        <button class="cat-pill" data-cat="面">🍜 面</button>
+        <button class="cat-pill" data-cat="腊味">🥓 腊味</button>
+        <button class="cat-pill" data-cat="冷吃">🧊 冷吃</button>
+      </div>
+      <div class="dish-grid" id="dishGrid"></div>
+      <div class="empty" id="menuEmpty" style="display:none">
+        <span class="icon">📭</span>
+        <p>还没有菜品，点击右下角 + 添加</p>
+      </div>
+    </div>
+
+    <!-- ====== TAB 2: 点菜 ====== -->
+    <div class="page" id="page-meal">
+      <div id="mealList"></div>
+      <div class="empty" id="mealEmpty">
+        <span class="icon">📋</span>
+        <p>今日还未点菜<br>去菜单页面选择想吃的菜吧</p>
+      </div>
+      <div style="padding:12px 0 8px" id="genShopWrap" hidden>
+        <button class="btn-confirm" style="width:100%;padding:14px;border-radius:var(--radius);border:none;font-size:1rem;font-weight:600;cursor:pointer;font-family:inherit;"
+          id="btnGenShop">🛒 生成代购清单</button>
+      </div>
+    </div>
+
+    <!-- ====== TAB 3: 代购 ====== -->
+    <div class="page" id="page-shop">
+      <div class="shop-progress" id="shopProgress" hidden>
+        <span>🛒</span>
+        <div class="progress-bar"><div class="fill" id="progressFill" style="width:0%"></div></div>
+        <span class="progress-text" id="progressText">0/0</span>
+      </div>
+      <div id="shopList"></div>
+      <div class="empty" id="shopEmpty">
+        <span class="icon">🛒</span>
+        <p>代购清单为空<br>先去点菜再生成代购清单吧</p>
+      </div>
+      <div class="add-shop-row" id="addShopRow" hidden>
+        <input type="text" id="shopItemInput" placeholder="手动添加代购项..." maxlength="50">
+        <select id="shopItemCat">
+          <option value="荤菜类">荤菜类</option>
+          <option value="素菜类">素菜类</option>
+          <option value="调料">调料</option>
+          <option value="干货">干货</option>
+          <option value="其他">其他</option>
+        </select>
+        <button class="btn-sm" id="btnAddShop">添加</button>
+      </div>
+    </div>
+
+    <!-- ====== TAB 4: 记仇本 ====== -->
+    <div class="page" id="page-grudge">
+      <div class="grudge-header-bar">
+        <button class="btn-sm active" data-gfilter="all">全部</button>
+        <button class="btn-sm" data-gfilter="active">🔥 未原谅</button>
+        <button class="btn-sm" data-gfilter="resolved">💚 已原谅</button>
+        <button class="btn-sm" id="btnAddGrudge" style="margin-left:auto;background:var(--purple);color:#fff;border-color:var(--purple);">＋ 记一笔</button>
+      </div>
+      <div class="grudge-list" id="grudgeList"></div>
+      <div class="empty" id="grudgeEmpty">
+        <span class="icon">📝</span>
+        <p id="grudgeEmptyText">还没有记仇记录<br>点右上角 ＋ 记一笔吧</p>
+      </div>
+    </div>
+
+    <!-- ====== TAB 5: 我的 ====== -->
+    <div class="page" id="page-me">
+      <div class="my-avatar" id="myAvatar">💙</div>
+      <div class="my-name">慕闻心璨</div>
+      <div class="my-subtitle">属于两个人的美食空间</div>
+      <div class="stat-row">
+        <div class="stat-box"><div class="num" id="statDishes">0</div><div class="lbl">菜品总数</div></div>
+        <div class="stat-box"><div class="num" id="statMeals">0</div><div class="lbl">今日已点</div></div>
+        <div class="stat-box"><div class="num" id="statShop">0</div><div class="lbl">待购项</div></div>
+      </div>
+      <div class="my-menu">
+        <div class="my-item" id="btnAppIcon">🪄 自定义图标 <span class="arrow">›</span></div>
+        <div class="my-item" id="btnResetIcon" style="display:none;color:var(--orange)">🔄 恢复默认图标 <span class="arrow">›</span></div>
+        <div class="my-item" id="btnBgMenu">🎨 背景图片：菜单页 <span id="bgStatusMenu" style="font-size:0.72rem;color:var(--gray);margin-left:4px;">未设置</span> <span class="arrow">›</span></div>
+        <div class="my-item" id="btnBgMeal">🎨 背景图片：点菜页 <span id="bgStatusMeal" style="font-size:0.72rem;color:var(--gray);margin-left:4px;">未设置</span> <span class="arrow">›</span></div>
+        <div class="my-item" id="btnBgShop">🎨 背景图片：代购页 <span id="bgStatusShop" style="font-size:0.72rem;color:var(--gray);margin-left:4px;">未设置</span> <span class="arrow">›</span></div>
+        <div class="my-item" id="btnBgMe">🎨 背景图片：我的页 <span id="bgStatusMe" style="font-size:0.72rem;color:var(--gray);margin-left:4px;">未设置</span> <span class="arrow">›</span></div>
+        <div class="my-item" id="btnClearAllBg" style="color:var(--orange);display:none">🔄 清除所有背景 <span class="arrow">›</span></div>
+        <div class="my-item" id="btnPairing">💑 情侣配对 <span class="arrow">›</span></div>
+        <div class="my-item" id="btnExport">📤 导出数据 <span class="arrow">›</span></div>
+        <div class="my-item" id="btnClearMeal">🗑️ 清空今日点菜 <span class="arrow">›</span></div>
+        <div class="my-item" id="btnClearAll" style="color:var(--danger)">⚠️ 清空全部数据 <span class="arrow">›</span></div>
+      </div>
+      <p style="text-align:center;margin-top:24px;font-size:0.72rem;color:var(--gray);">慕闻心璨 v1.0 · Made with 💙</p>
+    </div>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" id="fabAdd" title="添加菜品">＋</button>
+
+  <!-- Bottom Nav -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-tab="menu">
+      <span class="nav-icon">🍽️</span>菜单
+    </button>
+    <button class="nav-item" data-tab="meal">
+      <span class="nav-icon">📋</span>
+      <span id="mealBadge" class="nav-badge" style="display:none">0</span>点菜
+    </button>
+    <button class="nav-item" data-tab="shop">
+      <span class="nav-icon">🛒</span>
+      <span id="shopBadge" class="nav-badge" style="display:none">0</span>代购
+    </button>
+    <button class="nav-item" data-tab="grudge">
+      <span class="nav-icon">📝</span>
+      <span id="grudgeBadge" class="nav-badge" style="display:none">0</span>记仇
+    </button>
+    <button class="nav-item" data-tab="me">
+      <span class="nav-icon">👤</span>我的
+    </button>
+  </nav>
+
+  <!-- Modal: Add/Edit Dish -->
+  <div class="modal-overlay" id="dishModal">
+    <div class="modal">
+      <h3 id="modalTitle">添加菜品</h3>
+      <div class="form-group"><label>菜品名称</label><input type="text" id="dishName" placeholder="如：麻辣火锅" maxlength="30"></div>
+      <div class="form-group"><label>分类</label>
+        <select id="dishCat">
+          <option value="荤菜">荤菜</option><option value="素菜">素菜</option>
+          <option value="汤">汤</option><option value="甜品">甜品</option>
+          <option value="面">面</option><option value="腊味">腊味</option><option value="冷吃">冷吃</option>
+        </select>
+      </div>
+      <div class="form-group"><label>Emoji 图标</label><input type="text" id="dishEmoji" placeholder="如：🥘" maxlength="4"></div>
+      <div class="form-group"><label>口味标签（逗号分隔，如：麻,辣,香）</label><input type="text" id="dishTags" placeholder="麻,辣,香" maxlength="40"></div>
+      <div class="form-group"><label>所需食材（每行一个，格式：食材名,分类）</label>
+        <textarea id="dishIngredients" placeholder="牛肉卷,荤菜类&#10;金针菇,素菜类&#10;火锅底料,调料" rows="4"></textarea>
+      </div>
+      <input type="hidden" id="dishEditId">
+      <div class="form-row">
+        <button class="btn btn-cancel" id="btnModalCancel">取消</button>
+        <button class="btn btn-confirm" id="btnModalSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Grudge -->
+  <div class="modal-overlay" id="grudgeModal">
+    <div class="modal">
+      <h3 id="grudgeModalTitle">📝 记一笔仇</h3>
+      <div class="form-group"><label>标题</label><input type="text" id="grudgeTitle" placeholder="如：今天又忘记洗碗！" maxlength="50"></div>
+      <div class="form-group"><label>详细描述（可选）</label><textarea id="grudgeDesc" placeholder="描述一下发生了什么…" rows="3" maxlength="500"></textarea></div>
+      <div class="form-group"><label>严重程度</label>
+        <div style="display:flex;gap:10px;margin-top:4px;" id="severityPicker">
+          <label style="flex:1;text-align:center;padding:10px;border-radius:10px;background:var(--card);border:2px solid var(--border);cursor:pointer;transition:all 0.15s;" data-sev="1">
+            <span style="font-size:1.8rem;">😤</span><br><span style="font-size:0.72rem;color:var(--gray);">轻度</span>
+          </label>
+          <label style="flex:1;text-align:center;padding:10px;border-radius:10px;background:var(--card);border:2px solid var(--border);cursor:pointer;transition:all 0.15s;" data-sev="2">
+            <span style="font-size:1.8rem;">😠</span><br><span style="font-size:0.72rem;color:var(--gray);">中度</span>
+          </label>
+          <label style="flex:1;text-align:center;padding:10px;border-radius:10px;background:var(--card);border:2px solid var(--border);cursor:pointer;transition:all 0.15s;" data-sev="3">
+            <span style="font-size:1.8rem;">🤬</span><br><span style="font-size:0.72rem;color:var(--gray);">严重</span>
+          </label>
+        </div>
+      </div>
+      <input type="hidden" id="grudgeSeverity" value="1">
+      <div class="form-row">
+        <button class="btn btn-cancel" id="btnGrudgeCancel">取消</button>
+        <button class="btn btn-confirm" id="btnGrudgeSave">记下了 ✍️</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Confirm -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal" style="text-align:center">
+      <span style="font-size:3rem;display:block;margin-bottom:12px;">⚠️</span>
+      <h3 id="confirmTitle">确认操作</h3>
+      <p id="confirmMsg" style="color:var(--gray);margin-bottom:20px;font-size:0.9rem;"></p>
+      <div class="form-row">
+        <button class="btn btn-cancel" id="btnConfirmCancel">取消</button>
+        <button class="btn btn-confirm" id="btnConfirmOk" style="background:var(--danger)">确认</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal: Pairing -->
+  <div class="modal-overlay" id="pairModal">
+    <div class="modal" style="text-align:center">
+      <span style="font-size:3rem;display:block;margin-bottom:8px;">💑</span>
+      <h3>情侣配对</h3>
+      <p style="color:var(--gray);font-size:0.82rem;margin-bottom:16px;">设置相同的配对码即可共享数据<br>（需在同一设备或手动同步）</p>
+      <div class="form-group"><label>你的昵称</label><input type="text" id="pairName1" placeholder="如：宝贝" maxlength="10"></div>
+      <div class="form-group"><label>TA的昵称</label><input type="text" id="pairName2" placeholder="如：宝宝" maxlength="10"></div>
+      <div class="form-group"><label>配对码（自动生成，可手动修改）</label><input type="text" id="pairCode" placeholder="配对码" maxlength="20"></div>
+      <div class="form-row">
+        <button class="btn btn-cancel" id="btnPairCancel">取消</button>
+        <button class="btn btn-confirm" id="btnPairSave">保存</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Hidden file input for background image & icon -->
+  <input type="file" id="bgFileInput" accept="image/*" style="display:none">
+  <input type="file" id="iconFileInput" accept="image/*" style="display:none">
+
+  <!-- Crop Modal -->
+  <div class="crop-overlay" id="cropOverlay">
+    <div class="crop-toolbar">
+      <button class="crop-cancel" id="cropCancel">取消</button>
+      <span style="font-size:0.9rem;">拖动图片调整位置</span>
+      <button class="crop-done" id="cropDone">裁剪完成 ✓</button>
+    </div>
+    <div class="crop-canvas-wrap" id="cropWrap">
+      <img id="cropImg" src="" alt="">
+      <div class="crop-frame"></div>
+    </div>
+    <div class="crop-zoom-bar">
+      <span>🔍−</span>
+      <input type="range" id="cropZoom" min="0.5" max="4" step="0.05" value="1">
+      <span>🔍＋</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===== Inline PWA Manifest ===== -->
+<script>
+  const manifest = {
+    name: '慕闻心璨',
+    short_name: '慕闻心璨',
+    description: '情侣专属点菜买菜助手',
+    start_url: '.',
+    display: 'standalone',
+    background_color: '#0a1628',
+    theme_color: '#0ea5e9',
+    orientation: 'portrait',
+    icons: [{
+      src: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" rx="32" fill="#0ea5e9"/><text x="96" y="130" font-size="100" text-anchor="middle">💙</text></svg>'),
+      sizes: '192x192', type: 'image/svg+xml', purpose: 'any maskable'
+    }]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+  const manifestURL = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = manifestURL;
+  document.head.appendChild(link);
+</script>
+
+<!-- ===== Service Worker ===== -->
+<script>
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    const CACHE = 'mwc-v1';
+    self.addEventListener('install', e => { self.skipWaiting(); });
+    self.addEventListener('activate', e => { e.waitUntil(clients.claim()); });
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(r => r || fetch(e.request).then(res => {
+          if (res.ok) { const clone = res.clone(); caches.open(CACHE).then(c => c.put(e.request, clone)); }
+          return res;
+        }).catch(() => caches.match(e.request)))
+      );
+    });
+  `;
+  const swBlob = new Blob([swCode], {type: 'application/javascript'});
+  const swURL = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swURL).catch(() => {});
+}
+</script>
+
+<!-- ===== App Logic ===== -->
+<script>
+(function() {
+  'use strict';
+
+  // ---- State ----
+  const DEFAULTS = {
+    dishes: [
+      {id:1,name:'麻辣火锅',category:'荤菜',emoji:'🥘',tags:['麻','辣','香'],ingredients:[{name:'牛肉卷',cat:'荤菜类'},{name:'毛肚',cat:'荤菜类'},{name:'金针菇',cat:'素菜类'},{name:'火锅底料',cat:'调料'}]},
+      {id:2,name:'芝士蛋糕',category:'甜品',emoji:'🍰',tags:['甜','香'],ingredients:[{name:'奶油奶酪',cat:'其他'},{name:'鸡蛋',cat:'荤菜类'},{name:'低筋面粉',cat:'干货'}]},
+      {id:3,name:'山城辣子鸡',category:'荤菜',emoji:'🌶️',tags:['麻','辣','香'],ingredients:[{name:'鸡腿肉',cat:'荤菜类'},{name:'干辣椒',cat:'干货'},{name:'花椒',cat:'调料'}]},
+      {id:4,name:'珍珠奶茶',category:'甜品',emoji:'🧋',tags:['甜','香'],ingredients:[{name:'木薯粉圆',cat:'干货'},{name:'红茶',cat:'其他'},{name:'牛奶',cat:'其他'}]},
+      {id:5,name:'法式煎饼',category:'面',emoji:'🥞',tags:['甜','香'],ingredients:[{name:'面粉',cat:'干货'},{name:'鸡蛋',cat:'荤菜类'},{name:'黄油',cat:'其他'},{name:'枫糖浆',cat:'其他'}]},
+      {id:6,name:'虾仁滑蛋',category:'荤菜',emoji:'🍤',tags:['鲜','香'],ingredients:[{name:'虾仁',cat:'荤菜类'},{name:'鸡蛋',cat:'荤菜类'},{name:'葱',cat:'素菜类'}]},
+      {id:7,name:'酸辣汤',category:'汤',emoji:'🍲',tags:['酸','辣'],ingredients:[{name:'豆腐',cat:'素菜类'},{name:'木耳',cat:'干货'},{name:'醋',cat:'调料'},{name:'白胡椒粉',cat:'调料'}]},
+      {id:8,name:'蒜泥白肉',category:'冷吃',emoji:'🥩',tags:['辣','香'],ingredients:[{name:'五花肉',cat:'荤菜类'},{name:'蒜',cat:'素菜类'},{name:'辣椒油',cat:'调料'}]},
+      {id:9,name:'腊味合蒸',category:'腊味',emoji:'🥓',tags:['咸','香'],ingredients:[{name:'腊肉',cat:'荤菜类'},{name:'腊肠',cat:'荤菜类'},{name:'腊鱼',cat:'荤菜类'}]},
+      {id:10,name:'麻婆豆腐',category:'素菜',emoji:'🫘',tags:['麻','辣','香'],ingredients:[{name:'嫩豆腐',cat:'素菜类'},{name:'牛肉末',cat:'荤菜类'},{name:'豆瓣酱',cat:'调料'},{name:'花椒粉',cat:'调料'}]},
+    ],
+    mealPlan: [],
+    shoppingList: [],
+    settings: { pairCode: '', pairName1: '', pairName2: '', bgImages: { menu: null, meal: null, shop: null, grudge: null, me: null }, appIcon: null, currentBgPage: null },
+    grudges: []
+  };
+
+  let data = JSON.parse(JSON.stringify(DEFAULTS));
+  let currentTab = 'menu';
+  let currentCat = '全部';
+  let searchQuery = '';
+
+  // ---- Load / Save ----
+  function load() {
+    try {
+      const raw = localStorage.getItem('muwenxincan_data');
+      if (raw) {
+        const saved = JSON.parse(raw);
+        data.dishes = saved.dishes || DEFAULTS.dishes;
+        data.mealPlan = saved.mealPlan || [];
+        data.shoppingList = saved.shoppingList || [];
+        data.settings = saved.settings || DEFAULTS.settings;
+        data.grudges = saved.grudges || [];
+      }
+    } catch(e) { data = JSON.parse(JSON.stringify(DEFAULTS)); }
+  }
+
+  function save() {
+    localStorage.setItem('muwenxincan_data', JSON.stringify(data));
+  }
+
+  // ---- Toast ----
+  let toastTimer;
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => el.classList.remove('show'), 1800);
+  }
+
+  // ---- Tab Navigation ----
+  function switchTab(tab) {
+    currentTab = tab;
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + tab).classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+    document.querySelector('[data-tab="' + tab + '"]').classList.add('active');
+
+    const titles = { menu: '🍽️ 菜单', meal: '📋 今日点菜', shop: '🛒 代购清单', grudge: '📝 记仇本', me: '👤 我的' };
+    document.getElementById('headerTitle').textContent = titles[tab] || '慕闻心璨';
+
+    // Show/hide FAB
+    document.getElementById('fabAdd').style.display = (tab === 'menu') ? '' : 'none';
+
+    if (tab === 'menu') renderMenu();
+    if (tab === 'meal') renderMeal();
+    if (tab === 'shop') renderShop();
+    if (tab === 'grudge') renderGrudge();
+    if (tab === 'me') renderMe();
+  }
+
+  document.querySelectorAll('.nav-item').forEach(btn => {
+    btn.addEventListener('click', () => switchTab(btn.dataset.tab));
+  });
+
+  // ---- Render: Menu ----
+  function renderMenu() {
+    const grid = document.getElementById('dishGrid');
+    const empty = document.getElementById('menuEmpty');
+    let dishes = data.dishes;
+
+    if (currentCat !== '全部') dishes = dishes.filter(d => d.category === currentCat);
+    if (searchQuery) dishes = dishes.filter(d => d.name.includes(searchQuery) || d.tags.some(t => t.includes(searchQuery)));
+
+    grid.innerHTML = '';
+    if (dishes.length === 0) {
+      empty.style.display = '';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const selectedIds = new Set(data.mealPlan.map(m => m.dishId));
+
+    dishes.forEach(d => {
+      const card = document.createElement('div');
+      card.className = 'dish-card' + (selectedIds.has(d.id) ? ' selected' : '');
+      const tagClass = (tag) => {
+        if (/麻|辣|酸/.test(tag)) return 'spicy';
+        if (/甜/.test(tag)) return 'sweet';
+        if (/香/.test(tag)) return 'savory';
+        if (/鲜/.test(tag)) return 'fresh';
+        if (/咸/.test(tag)) return 'nutty';
+        return 'common';
+      };
+      card.innerHTML = `
+        <div class="dish-card-img">
+          ${d.emoji || '🍽️'}
+          <span class="cat-badge">${d.category}</span>
+        </div>
+        <div class="dish-card-body">
+          <h3>${d.name}</h3>
+          <div class="tags">${d.tags.map(t => `<span class="tag tag-${tagClass(t)}">${t}</span>`).join('')}</div>
+          <div class="dish-actions">
+            <button class="mini-btn add-meal" data-id="${d.id}">${selectedIds.has(d.id)?'✓ 已点':'＋ 点菜'}</button>
+            <button class="mini-btn edit-dish" data-id="${d.id}">✎</button>
+            <button class="mini-btn danger del-dish" data-id="${d.id}">✕</button>
+          </div>
+        </div>`;
+      card.querySelector('.dish-card-img')?.addEventListener('click', () => toggleMeal(d.id));
+      card.querySelector('.add-meal')?.addEventListener('click', (e) => { e.stopPropagation(); toggleMeal(d.id); });
+      card.querySelector('.edit-dish')?.addEventListener('click', (e) => { e.stopPropagation(); openDishModal(d.id); });
+      card.querySelector('.del-dish')?.addEventListener('click', (e) => { e.stopPropagation(); deleteDish(d.id); });
+      grid.appendChild(card);
+    });
+  }
+
+  function toggleMeal(dishId) {
+    const idx = data.mealPlan.findIndex(m => m.dishId === dishId);
+    if (idx >= 0) {
+      data.mealPlan.splice(idx, 1);
+      toast('已从点菜中移除');
+    } else {
+      data.mealPlan.push({ id: Date.now(), dishId, servings: 1, date: new Date().toISOString().slice(0,10) });
+      toast('已加入今日点菜 ✨');
+    }
+    // Also sync shopping list — remove items for this dish if unselected
+    data.shoppingList = data.shoppingList.filter(s => {
+      if (s.sourceDishId === dishId) return false;
+      return true;
+    });
+    save();
+    renderMenu();
+    updateBadges();
+  }
+
+  function deleteDish(id) {
+    data.dishes = data.dishes.filter(d => d.id !== id);
+    data.mealPlan = data.mealPlan.filter(m => m.dishId !== id);
+    data.shoppingList = data.shoppingList.filter(s => s.sourceDishId !== id);
+    save();
+    renderMenu();
+    updateBadges();
+    toast('菜品已删除');
+  }
+
+  // ---- Category & Search ----
+  document.getElementById('catScroll').addEventListener('click', (e) => {
+    if (!e.target.classList.contains('cat-pill')) return;
+    currentCat = e.target.dataset.cat;
+    document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+    e.target.classList.add('active');
+    renderMenu();
+  });
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchQuery = e.target.value.trim();
+    renderMenu();
+  });
+
+  // ---- Dish Modal ----
+  function openDishModal(editId) {
+    const modal = document.getElementById('dishModal');
+    modal.classList.add('open');
+    document.getElementById('dishEditId').value = editId || '';
+    document.getElementById('modalTitle').textContent = editId ? '编辑菜品' : '添加菜品';
+
+    if (editId) {
+      const d = data.dishes.find(d => d.id === editId);
+      if (d) {
+        document.getElementById('dishName').value = d.name;
+        document.getElementById('dishCat').value = d.category;
+        document.getElementById('dishEmoji').value = d.emoji || '';
+        document.getElementById('dishTags').value = d.tags.join(',');
+        document.getElementById('dishIngredients').value = d.ingredients.map(i => i.name + ',' + i.cat).join('\n');
+      }
+    } else {
+      document.getElementById('dishName').value = '';
+      document.getElementById('dishCat').value = '荤菜';
+      document.getElementById('dishEmoji').value = '';
+      document.getElementById('dishTags').value = '';
+      document.getElementById('dishIngredients').value = '';
+    }
+  }
+
+  function saveDishModal() {
+    const editId = document.getElementById('dishEditId').value;
+    const name = document.getElementById('dishName').value.trim();
+    if (!name) { toast('请输入菜品名称'); return; }
+    const category = document.getElementById('dishCat').value;
+    const emoji = document.getElementById('dishEmoji').value.trim();
+    const tagsRaw = document.getElementById('dishTags').value.trim();
+    const tags = tagsRaw ? tagsRaw.split(/[,，]/).map(t => t.trim()).filter(Boolean) : [];
+    const ingRaw = document.getElementById('dishIngredients').value.trim();
+    const ingredients = ingRaw ? ingRaw.split('\n').filter(Boolean).map(line => {
+      const parts = line.split(/[,，]/);
+      return { name: (parts[0]||'').trim(), cat: (parts[1]||'其他').trim() };
+    }) : [];
+
+    if (editId) {
+      const d = data.dishes.find(d => d.id == editId);
+      if (d) {
+        d.name = name; d.category = category; d.emoji = emoji;
+        d.tags = tags; d.ingredients = ingredients;
+      }
+    } else {
+      data.dishes.unshift({ id: Date.now(), name, category, emoji, tags, ingredients });
+    }
+
+    closeDishModal();
+    save();
+    renderMenu();
+    updateBadges();
+    toast(editId ? '菜品已更新 ✓' : '菜品已添加 ✓');
+  }
+
+  function closeDishModal() {
+    document.getElementById('dishModal').classList.remove('open');
+  }
+
+  document.getElementById('btnModalSave').addEventListener('click', saveDishModal);
+  document.getElementById('btnModalCancel').addEventListener('click', closeDishModal);
+  document.getElementById('dishModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) closeDishModal();
+  });
+  document.getElementById('fabAdd').addEventListener('click', () => openDishModal(null));
+  document.getElementById('btnAddDish').addEventListener('click', () => openDishModal(null));
+
+  // ---- Render: Meal Plan ----
+  function renderMeal() {
+    const list = document.getElementById('mealList');
+    const empty = document.getElementById('mealEmpty');
+    const genWrap = document.getElementById('genShopWrap');
+
+    if (data.mealPlan.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = '';
+      genWrap.hidden = true;
+      return;
+    }
+    empty.style.display = 'none';
+    genWrap.hidden = false;
+
+    // Group by category
+    const groups = {};
+    data.mealPlan.forEach(m => {
+      const dish = data.dishes.find(d => d.id === m.dishId);
+      if (!dish) return;
+      const cat = dish.category;
+      if (!groups[cat]) groups[cat] = [];
+      groups[cat].push({ ...m, dish });
+    });
+
+    list.innerHTML = '';
+    for (const [cat, items] of Object.entries(groups)) {
+      const sec = document.createElement('div');
+      sec.className = 'meal-section';
+      sec.innerHTML = `<h3>${cat} <span class="count">(${items.length})</span></h3>`;
+      items.forEach(item => {
+        const row = document.createElement('div');
+        row.className = 'meal-item';
+        row.innerHTML = `
+          <span class="dish-emoji">${item.dish.emoji || '🍽️'}</span>
+          <div class="dish-info">
+            <div class="name">${item.dish.name}</div>
+            <div class="meta">${item.dish.tags.join(' · ')}</div>
+          </div>
+          <div class="serving-ctrl">
+            <button class="dec" data-id="${item.id}">−</button>
+            <span class="num">${item.servings}</span>
+            <button class="inc" data-id="${item.id}">＋</button>
+          </div>
+          <button style="border:none;background:none;cursor:pointer;color:var(--gray);font-size:1.1rem;padding:4px 8px;" class="rem-meal" data-dishid="${item.dishId}">🗑️</button>`;
+        sec.appendChild(row);
+      });
+      list.appendChild(sec);
+    }
+
+    // Event delegation
+    list.querySelectorAll('.inc').forEach(b => b.addEventListener('click', () => {
+      const m = data.mealPlan.find(m => m.id == b.dataset.id);
+      if (m) { m.servings++; save(); renderMeal(); updateBadges(); }
+    }));
+    list.querySelectorAll('.dec').forEach(b => b.addEventListener('click', () => {
+      const m = data.mealPlan.find(m => m.id == b.dataset.id);
+      if (m && m.servings > 1) { m.servings--; save(); renderMeal(); updateBadges(); }
+    }));
+    list.querySelectorAll('.rem-meal').forEach(b => b.addEventListener('click', () => {
+      const dishId = parseInt(b.dataset.dishid);
+      data.mealPlan = data.mealPlan.filter(m => m.dishId !== dishId);
+      data.shoppingList = data.shoppingList.filter(s => s.sourceDishId !== dishId);
+      save(); renderMeal(); renderMenu(); updateBadges();
+      toast('已移除');
+    }));
+  }
+
+  // ---- Generate Shopping List ----
+  document.getElementById('btnGenShop').addEventListener('click', () => {
+    data.shoppingList = [];
+    const seen = new Set();
+    data.mealPlan.forEach(m => {
+      const dish = data.dishes.find(d => d.id === m.dishId);
+      if (!dish) return;
+      dish.ingredients.forEach(ing => {
+        const key = ing.name + '|' + ing.cat;
+        if (!seen.has(key)) {
+          seen.add(key);
+          data.shoppingList.push({
+            id: Date.now() + Math.random(),
+            ingredientName: ing.name,
+            category: ing.cat,
+            checked: false,
+            sourceDishId: dish.id
+          });
+        }
+      });
+    });
+    save();
+    renderShop();
+    updateBadges();
+    switchTab('shop');
+    toast('代购清单已生成 🛒');
+  });
+
+  // ---- Render: Shopping List ----
+  function renderShop() {
+    const list = document.getElementById('shopList');
+    const empty = document.getElementById('shopEmpty');
+    const prog = document.getElementById('shopProgress');
+    const addRow = document.getElementById('addShopRow');
+
+    if (data.shoppingList.length === 0) {
+      list.innerHTML = '';
+      empty.style.display = '';
+      prog.hidden = true;
+      addRow.hidden = true;
+      return;
+    }
+    empty.style.display = 'none';
+    prog.hidden = false;
+    addRow.hidden = false;
+
+    const checked = data.shoppingList.filter(s => s.checked).length;
+    const total = data.shoppingList.length;
+    const pct = Math.round((checked / total) * 100);
+    document.getElementById('progressFill').style.width = pct + '%';
+    document.getElementById('progressText').textContent = `${checked}/${total} (${pct}%)`;
+
+    // Group by category
+    const groups = {};
+    data.shoppingList.forEach(s => {
+      if (!groups[s.category]) groups[s.category] = [];
+      groups[s.category].push(s);
+    });
+
+    list.innerHTML = '';
+    for (const [cat, items] of Object.entries(groups)) {
+      const grp = document.createElement('div');
+      grp.className = 'shop-group';
+      grp.innerHTML = `<h4>📌 ${cat} (${items.filter(i=>i.checked).length}/${items.length})</h4>`;
+      items.forEach(item => {
+        const src = data.dishes.find(d => d.id === item.sourceDishId);
+        const row = document.createElement('div');
+        row.className = 'shop-item' + (item.checked ? ' checked' : '');
+        row.innerHTML = `
+          <input type="checkbox" class="shop-cb" ${item.checked?'checked':''} data-id="${item.id}">
+          <span class="shop-name">${item.ingredientName}</span>
+          <span class="shop-from">${src ? src.name : ''}</span>
+          <button class="shop-del" data-id="${item.id}">✕</button>`;
+        grp.appendChild(row);
+      });
+      list.appendChild(grp);
+    }
+
+    // Checkbox events
+    list.querySelectorAll('.shop-cb').forEach(cb => {
+      cb.addEventListener('change', () => {
+        const s = data.shoppingList.find(s => s.id == cb.dataset.id);
+        if (s) { s.checked = cb.checked; save(); renderShop(); updateBadges(); }
+      });
+    });
+    // Delete events
+    list.querySelectorAll('.shop-del').forEach(b => {
+      b.addEventListener('click', () => {
+        data.shoppingList = data.shoppingList.filter(s => s.id != b.dataset.id);
+        save(); renderShop(); updateBadges();
+      });
+    });
+  }
+
+  // Add custom shop item
+  document.getElementById('btnAddShop').addEventListener('click', () => {
+    const input = document.getElementById('shopItemInput');
+    const name = input.value.trim();
+    if (!name) return;
+    data.shoppingList.push({
+      id: Date.now(),
+      ingredientName: name,
+      category: document.getElementById('shopItemCat').value,
+      checked: false,
+      sourceDishId: 0
+    });
+    input.value = '';
+    save(); renderShop(); updateBadges();
+  });
+  document.getElementById('shopItemInput').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('btnAddShop').click();
+  });
+
+  // ---- Render: My ----
+  function renderMe() {
+    const activeMeals = data.mealPlan.length;
+    const uncheckedShop = data.shoppingList.filter(s => !s.checked).length;
+    document.getElementById('statDishes').textContent = data.dishes.length;
+    document.getElementById('statMeals').textContent = activeMeals;
+    document.getElementById('statShop').textContent = uncheckedShop;
+  }
+
+  // ---- Badges ----
+  function updateBadges() {
+    const mealBadge = document.getElementById('mealBadge');
+    const shopBadge = document.getElementById('shopBadge');
+    const grudgeBadge = document.getElementById('grudgeBadge');
+    const mealCount = data.mealPlan.length;
+    const shopCount = data.shoppingList.filter(s => !s.checked).length;
+    const grudgeCount = data.grudges.filter(g => !g.resolved).length;
+
+    if (mealCount > 0) { mealBadge.style.display = ''; mealBadge.textContent = mealCount; }
+    else { mealBadge.style.display = 'none'; }
+
+    if (shopCount > 0) { shopBadge.style.display = ''; shopBadge.textContent = shopCount; }
+    else { shopBadge.style.display = 'none'; }
+
+    if (grudgeCount > 0) { grudgeBadge.style.display = ''; grudgeBadge.textContent = grudgeCount; }
+    else { grudgeBadge.style.display = 'none'; }
+
+    // Also update pages if not visible
+    if (currentTab === 'meal') renderMeal();
+    if (currentTab === 'shop') renderShop();
+    if (currentTab === 'grudge') renderGrudge();
+  }
+
+  // ---- Pairing Modal ----
+  document.getElementById('btnPairing').addEventListener('click', () => {
+    document.getElementById('pairModal').classList.add('open');
+    document.getElementById('pairName1').value = data.settings.pairName1 || '';
+    document.getElementById('pairName2').value = data.settings.pairName2 || '';
+    document.getElementById('pairCode').value = data.settings.pairCode || genPairCode();
+  });
+
+  function genPairCode() {
+    return 'MWXC-' + Math.random().toString(36).slice(2, 8).toUpperCase();
+  }
+
+  document.getElementById('btnPairSave').addEventListener('click', () => {
+    data.settings.pairName1 = document.getElementById('pairName1').value.trim();
+    data.settings.pairName2 = document.getElementById('pairName2').value.trim();
+    data.settings.pairCode = document.getElementById('pairCode').value.trim() || genPairCode();
+    save();
+    document.getElementById('pairModal').classList.remove('open');
+    renderMe();
+    toast('配对设置已保存 💑');
+  });
+  document.getElementById('btnPairCancel').addEventListener('click', () => {
+    document.getElementById('pairModal').classList.remove('open');
+  });
+  document.getElementById('pairModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) document.getElementById('pairModal').classList.remove('open');
+  });
+
+  // ---- Export ----
+  document.getElementById('btnExport').addEventListener('click', () => {
+    const exportData = JSON.stringify(data, null, 2);
+    const blob = new Blob([exportData], {type: 'application/json'});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url; a.download = 'muwenxincan-backup.json'; a.click();
+    URL.revokeObjectURL(url);
+    toast('数据已导出 📤');
+  });
+
+  // ---- Clear Meal ----
+  document.getElementById('btnClearMeal').addEventListener('click', () => {
+    data.mealPlan = [];
+    data.shoppingList = [];
+    save(); renderMeal(); renderShop(); updateBadges();
+    toast('今日点菜已清空');
+  });
+
+  // ---- Clear All (with confirm) ----
+  let confirmCallback = null;
+  function showConfirm(title, msg, cb) {
+    document.getElementById('confirmTitle').textContent = title;
+    document.getElementById('confirmMsg').textContent = msg;
+    document.getElementById('confirmModal').classList.add('open');
+    confirmCallback = cb;
+  }
+  document.getElementById('btnConfirmOk').addEventListener('click', () => {
+    document.getElementById('confirmModal').classList.remove('open');
+    if (confirmCallback) confirmCallback();
+    confirmCallback = null;
+  });
+  document.getElementById('btnConfirmCancel').addEventListener('click', () => {
+    document.getElementById('confirmModal').classList.remove('open');
+    confirmCallback = null;
+  });
+  document.getElementById('confirmModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      document.getElementById('confirmModal').classList.remove('open');
+      confirmCallback = null;
+    }
+  });
+
+  document.getElementById('btnClearAll').addEventListener('click', () => {
+    showConfirm('清空全部数据', '将删除所有菜品、点菜记录和代购清单，此操作不可恢复。', () => {
+      data = JSON.parse(JSON.stringify(DEFAULTS));
+      save();
+      currentCat = '全部'; searchQuery = '';
+      document.getElementById('searchInput').value = '';
+      document.querySelectorAll('.cat-pill').forEach(p => p.classList.remove('active'));
+      document.querySelector('[data-cat="全部"]').classList.add('active');
+      renderMenu(); renderMeal(); renderShop(); updateBadges();
+      applyPageBackgrounds(); applyAppIcon();
+      toast('全部数据已清空');
+    });
+  });
+
+  // ---- FAB ----
+  document.getElementById('fabAdd').addEventListener('click', () => openDishModal(null));
+
+  // ---- Grudge Notebook ----
+  let grudgeFilter = 'all';
+
+  // Severity picker
+  document.getElementById('severityPicker').addEventListener('click', (e) => {
+    const label = e.target.closest('label[data-sev]');
+    if (!label) return;
+    document.querySelectorAll('#severityPicker label').forEach(l => {
+      l.style.borderColor = 'var(--border)';
+      l.style.background = 'var(--card)';
+    });
+    label.style.borderColor = 'var(--purple)';
+    label.style.background = 'rgba(14,165,233,0.1)';
+    document.getElementById('grudgeSeverity').value = label.dataset.sev;
+  });
+
+  function renderGrudge() {
+    const list = document.getElementById('grudgeList');
+    const empty = document.getElementById('grudgeEmpty');
+    const emptyText = document.getElementById('grudgeEmptyText');
+    let items = data.grudges;
+    if (grudgeFilter === 'active') items = items.filter(g => !g.resolved);
+    if (grudgeFilter === 'resolved') items = items.filter(g => g.resolved);
+    items.sort((a, b) => b.id - a.id);
+
+    list.innerHTML = '';
+    if (items.length === 0) {
+      empty.style.display = '';
+      emptyText.textContent = grudgeFilter === 'resolved' ? '还没有已原谅的记录' : grudgeFilter === 'active' ? '全是原谅过的，真棒！💚' : '还没有记仇记录\n点右上角 ＋ 记一笔吧';
+      return;
+    }
+    empty.style.display = 'none';
+
+    const sevEmoji = {1:'😤', 2:'😠', 3:'🤬'};
+    const authorNames = {0: '我', 1: data.settings.pairName1 || '我', 2: data.settings.pairName2 || 'TA'};
+
+    items.forEach(g => {
+      const card = document.createElement('div');
+      card.className = 'grudge-card' + (g.resolved ? ' resolved' : '');
+      card.innerHTML = `
+        ${g.resolved ? '<span class="forgiven-badge">💚 已原谅</span>' : ''}
+        <div class="grudge-header">
+          <span class="grudge-severity">${sevEmoji[g.severity] || '😤'}</span>
+          <span class="grudge-title">${g.title}</span>
+          <span class="grudge-date">${g.date}</span>
+        </div>
+        ${g.description ? `<div class="grudge-desc">${g.description}</div>` : ''}
+        <div class="grudge-actions">
+          ${g.resolved ? '' : '<button class="forgive" data-id="'+g.id+'">💚 原谅</button>'}
+          <button class="del" data-id="${g.id}">🗑️ 删除</button>
+        </div>
+        <div class="grudge-comments" id="comments-${g.id}">
+          ${(g.comments||[]).map(c => `
+            <div class="grudge-comment">
+              <span class="cmt-author">${c.author}</span>
+              <span class="cmt-text">${c.text}</span>
+              <span class="cmt-time">${c.time}</span>
+            </div>
+          `).join('')}
+        </div>
+        <div class="comment-input-row">
+          <input type="text" class="cmt-input" placeholder="说点什么…" maxlength="100" data-gid="${g.id}">
+          <button class="btn-cmt" data-gid="${g.id}">回复</button>
+        </div>`;
+      list.appendChild(card);
+    });
+
+    // Bind forgive buttons
+    list.querySelectorAll('.forgive').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const g = data.grudges.find(g => g.id == btn.dataset.id);
+        if (g) { g.resolved = true; save(); renderGrudge(); updateBadges(); toast('已原谅 💚'); }
+      });
+    });
+    // Bind delete buttons
+    list.querySelectorAll('.del').forEach(btn => {
+      btn.addEventListener('click', () => {
+        data.grudges = data.grudges.filter(g => g.id != btn.dataset.id);
+        save(); renderGrudge(); updateBadges(); toast('已删除');
+      });
+    });
+    // Bind comment buttons
+    list.querySelectorAll('.btn-cmt').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const gid = parseInt(btn.dataset.gid);
+        const input = list.querySelector(`.cmt-input[data-gid="${gid}"]`);
+        const text = input.value.trim();
+        if (!text) return;
+        const g = data.grudges.find(g => g.id === gid);
+        if (g) {
+          if (!g.comments) g.comments = [];
+          const author = data.settings.pairName1 ? (Math.random() > 0.5 ? data.settings.pairName1 : (data.settings.pairName2 || 'TA')) : '我';
+          g.comments.push({ author, text, time: new Date().toLocaleString('zh-CN',{month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) });
+          save(); renderGrudge(); toast('回复成功 💬');
+        }
+      });
+    });
+    // Bind comment input Enter key
+    list.querySelectorAll('.cmt-input').forEach(input => {
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') {
+          const btn = list.querySelector(`.btn-cmt[data-gid="${input.dataset.gid}"]`);
+          if (btn) btn.click();
+        }
+      });
+    });
+  }
+
+  // Grudge filter buttons
+  document.querySelectorAll('[data-gfilter]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      grudgeFilter = btn.dataset.gfilter;
+      document.querySelectorAll('[data-gfilter]').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderGrudge();
+    });
+  });
+
+  // Open grudge modal
+  document.getElementById('btnAddGrudge').addEventListener('click', () => {
+    document.getElementById('grudgeModal').classList.add('open');
+    document.getElementById('grudgeTitle').value = '';
+    document.getElementById('grudgeDesc').value = '';
+    document.getElementById('grudgeSeverity').value = '1';
+    // Reset severity picker
+    document.querySelectorAll('#severityPicker label').forEach((l,i) => {
+      l.style.borderColor = i === 0 ? 'var(--purple)' : 'var(--border)';
+      l.style.background = i === 0 ? 'rgba(14,165,233,0.1)' : 'var(--card)';
+    });
+  });
+
+  // Save grudge
+  document.getElementById('btnGrudgeSave').addEventListener('click', () => {
+    const title = document.getElementById('grudgeTitle').value.trim();
+    if (!title) { toast('请输入标题'); return; }
+    const desc = document.getElementById('grudgeDesc').value.trim();
+    const severity = parseInt(document.getElementById('grudgeSeverity').value);
+    data.grudges.push({
+      id: Date.now(), title, description: desc, severity,
+      date: new Date().toLocaleDateString('zh-CN'),
+      resolved: false, comments: []
+    });
+    save(); renderGrudge(); updateBadges();
+    document.getElementById('grudgeModal').classList.remove('open');
+    toast('记仇成功 📝');
+  });
+
+  document.getElementById('btnGrudgeCancel').addEventListener('click', () => {
+    document.getElementById('grudgeModal').classList.remove('open');
+  });
+  document.getElementById('grudgeModal').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) document.getElementById('grudgeModal').classList.remove('open');
+  });
+
+  // ---- Per-Page Background Images ----
+  const PAGE_KEYS = ['menu','meal','shop','grudge','me'];
+  const PAGE_LABELS = { menu:'菜单页', meal:'点菜页', shop:'代购页', grudge:'记仇本', me:'我的页' };
+
+  function applyPageBackgrounds() {
+    const hasAny = PAGE_KEYS.some(k => data.settings.bgImages[k]);
+    PAGE_KEYS.forEach(k => {
+      const page = document.getElementById('page-' + k);
+      const img = data.settings.bgImages[k];
+      if (!page) return;
+      // Remove old overlay
+      const oldOverlay = page.querySelector('.overlay-tint');
+      if (oldOverlay) oldOverlay.remove();
+
+      if (img) {
+        page.style.backgroundImage = `url(${img})`;
+        page.classList.add('has-page-bg');
+        // Add overlay tint
+        const overlay = document.createElement('div');
+        overlay.className = 'overlay-tint';
+        page.appendChild(overlay);
+      } else {
+        page.style.backgroundImage = '';
+        page.classList.remove('has-page-bg');
+      }
+    });
+    // Update status labels
+    PAGE_KEYS.forEach(k => {
+      const status = document.getElementById('bgStatus' + (k.charAt(0).toUpperCase()+k.slice(1)));
+      if (status) status.textContent = data.settings.bgImages[k] ? '✓ 已设置' : '未设置';
+    });
+    const clearBtn = document.getElementById('btnClearAllBg');
+    if (clearBtn) clearBtn.style.display = hasAny ? '' : 'none';
+  }
+
+  // ---- Crop Modal ----
+  let cropState = { img: null, x: 0, y: 0, scale: 1, dragging: false, startX: 0, startY: 0, origX: 0, origY: 0 };
+
+  function openCropModal(imageDataUrl, targetPage) {
+    data.settings.currentBgPage = targetPage;
+    const overlay = document.getElementById('cropOverlay');
+    const img = document.getElementById('cropImg');
+    const zoom = document.getElementById('cropZoom');
+    overlay.classList.add('open');
+    img.src = imageDataUrl;
+    zoom.value = 1;
+    cropState = { img: null, x: 0, y: 0, scale: 1, dragging: false, startX: 0, startY: 0, origX: 0, origY: 0 };
+    img.onload = () => {
+      fitImageToFrame();
+      img.style.transform = `translate(${cropState.x}px, ${cropState.y}px) scale(${cropState.scale})`;
+    };
+    if (img.complete && img.naturalWidth) {
+      fitImageToFrame();
+      img.style.transform = `translate(${cropState.x}px, ${cropState.y}px) scale(${cropState.scale})`;
+    }
+  }
+
+  function fitImageToFrame() {
+    const img = document.getElementById('cropImg');
+    const wrap = document.getElementById('cropWrap');
+    const frameW = wrap.clientWidth * 0.9;
+    const frameH = frameW / (9/16);
+    const imgW = img.naturalWidth;
+    const imgH = img.naturalHeight;
+    const scale = Math.max(frameW / imgW, frameH / imgH);
+    cropState.scale = scale;
+    cropState.x = (wrap.clientWidth - imgW * scale) / 2;
+    cropState.y = (wrap.clientHeight - imgH * scale) / 2;
+  }
+
+  document.getElementById('cropCancel').addEventListener('click', () => {
+    document.getElementById('cropOverlay').classList.remove('open');
+  });
+
+  document.getElementById('cropDone').addEventListener('click', () => {
+    const img = document.getElementById('cropImg');
+    const wrap = document.getElementById('cropWrap');
+    const frameW = wrap.clientWidth * 0.9;
+    const frameH = frameW / (9/16);
+    const frameX = (wrap.clientWidth - frameW) / 2;
+    const frameY = (wrap.clientHeight - frameH) / 2;
+
+    const canvas = document.createElement('canvas');
+    canvas.width = frameW * 2; // 2x for retina
+    canvas.height = frameH * 2;
+    const ctx = canvas.getContext('2d');
+    ctx.scale(2, 2);
+    // Map frame coords to image coords
+    const sx = (frameX - cropState.x) / cropState.scale;
+    const sy = (frameY - cropState.y) / cropState.scale;
+    const sw = frameW / cropState.scale;
+    const sh = frameH / cropState.scale;
+    ctx.drawImage(img, sx, sy, sw, sh, 0, 0, frameW, frameH);
+
+    const cropped = canvas.toDataURL('image/jpeg', 0.85);
+    const page = data.settings.currentBgPage;
+    if (page) {
+      data.settings.bgImages[page] = cropped;
+      save();
+      applyPageBackgrounds();
+      toast(`已设置${PAGE_LABELS[page]}背景 ✨`);
+    }
+    document.getElementById('cropOverlay').classList.remove('open');
+  });
+
+  // Drag support
+  const cropWrap = document.getElementById('cropWrap');
+  cropWrap.addEventListener('pointerdown', (e) => {
+    cropState.dragging = true;
+    cropState.startX = e.clientX;
+    cropState.startY = e.clientY;
+    cropState.origX = cropState.x;
+    cropState.origY = cropState.y;
+    cropWrap.setPointerCapture(e.pointerId);
+  });
+  cropWrap.addEventListener('pointermove', (e) => {
+    if (!cropState.dragging) return;
+    cropState.x = cropState.origX + (e.clientX - cropState.startX);
+    cropState.y = cropState.origY + (e.clientY - cropState.startY);
+    document.getElementById('cropImg').style.transform = `translate(${cropState.x}px, ${cropState.y}px) scale(${cropState.scale})`;
+  });
+  cropWrap.addEventListener('pointerup', () => { cropState.dragging = false; });
+  cropWrap.addEventListener('pointerleave', () => { cropState.dragging = false; });
+
+  // Zoom
+  document.getElementById('cropZoom').addEventListener('input', (e) => {
+    const newScale = parseFloat(e.target.value);
+    const wrap = document.getElementById('cropWrap');
+    const cx = wrap.clientWidth / 2;
+    const cy = wrap.clientHeight / 2;
+    const ratio = newScale / cropState.scale;
+    cropState.x = cx - (cx - cropState.x) * ratio;
+    cropState.y = cy - (cy - cropState.y) * ratio;
+    cropState.scale = newScale;
+    document.getElementById('cropImg').style.transform = `translate(${cropState.x}px, ${cropState.y}px) scale(${cropState.scale})`;
+  });
+
+  // Touch pinch-zoom
+  let pinchDist0 = 0, pinchScale0 = 1;
+  cropWrap.addEventListener('touchstart', (e) => {
+    if (e.touches.length === 2) {
+      pinchDist0 = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      pinchScale0 = cropState.scale;
+    }
+  }, {passive:false});
+  cropWrap.addEventListener('touchmove', (e) => {
+    if (e.touches.length === 2) {
+      e.preventDefault();
+      const dist = Math.hypot(e.touches[0].clientX - e.touches[1].clientX, e.touches[0].clientY - e.touches[1].clientY);
+      const ns = Math.min(4, Math.max(0.5, pinchScale0 * (dist / pinchDist0)));
+      document.getElementById('cropZoom').value = ns;
+      const wrap = document.getElementById('cropWrap');
+      const cx = wrap.clientWidth / 2, cy = wrap.clientHeight / 2;
+      const ratio = ns / cropState.scale;
+      cropState.x = cx - (cx - cropState.x) * ratio;
+      cropState.y = cy - (cy - cropState.y) * ratio;
+      cropState.scale = ns;
+      document.getElementById('cropImg').style.transform = `translate(${cropState.x}px, ${cropState.y}px) scale(${cropState.scale})`;
+    }
+  }, {passive:false});
+
+  // ---- Per-page bg button handlers ----
+  const bgFileInput = document.getElementById('bgFileInput');
+  function handleBgFile(file, targetPage) {
+    if (!file) return;
+    if (file.size > 100 * 1024 * 1024) {
+      toast('图片不能超过 100MB');
+      bgFileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      openCropModal(e.target.result, targetPage);
+    };
+    reader.readAsDataURL(file);
+    bgFileInput.value = '';
+  }
+
+  function pickBgForPage(page) {
+    data.settings.currentBgPage = page;
+    bgFileInput.click();
+  }
+
+  // Re-register file input handler
+  bgFileInput.addEventListener('change', () => {
+    handleBgFile(bgFileInput.files[0], data.settings.currentBgPage || 'menu');
+  });
+
+  document.getElementById('btnBgMenu').addEventListener('click', () => pickBgForPage('menu'));
+  document.getElementById('btnBgMeal').addEventListener('click', () => pickBgForPage('meal'));
+  document.getElementById('btnBgShop').addEventListener('click', () => pickBgForPage('shop'));
+  document.getElementById('btnBgMe').addEventListener('click', () => pickBgForPage('me'));
+
+  document.getElementById('btnClearAllBg').addEventListener('click', () => {
+    showConfirm('清除所有背景', '确定要清除所有页面的自定义背景吗？', () => {
+      PAGE_KEYS.forEach(k => { data.settings.bgImages[k] = null; });
+      save();
+      applyPageBackgrounds();
+      toast('所有背景已清除');
+    });
+  });
+
+  // ---- Custom App Icon ----
+  function applyAppIcon() {
+    const avatar = document.getElementById('myAvatar');
+    const resetBtn = document.getElementById('btnResetIcon');
+    const favicon = document.querySelector('link[rel="icon"]');
+
+    if (data.settings.appIcon) {
+      // Update avatar
+      if (avatar) {
+        avatar.innerHTML = `<img src="${data.settings.appIcon}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">`;
+      }
+      // Update favicon
+      if (favicon) {
+        favicon.href = data.settings.appIcon;
+      }
+      if (resetBtn) resetBtn.style.display = '';
+    } else {
+      // Restore default
+      if (avatar) avatar.innerHTML = '💙';
+      if (favicon) {
+        favicon.href = "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💙</text></svg>";
+      }
+      if (resetBtn) resetBtn.style.display = 'none';
+    }
+  }
+
+  const iconFileInput = document.getElementById('iconFileInput');
+  iconFileInput.addEventListener('change', () => {
+    const file = iconFileInput.files[0];
+    if (!file) return;
+    if (file.size > 100 * 1024 * 1024) {
+      toast('图标不能超过 100MB');
+      iconFileInput.value = '';
+      return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      data.settings.appIcon = e.target.result;
+      save();
+      applyAppIcon();
+      toast('图标已更新 ✨');
+    };
+    reader.readAsDataURL(file);
+    iconFileInput.value = '';
+  });
+
+  document.getElementById('btnAppIcon').addEventListener('click', () => {
+    iconFileInput.click();
+  });
+
+  document.getElementById('btnResetIcon').addEventListener('click', () => {
+    showConfirm('恢复默认图标', '确定要恢复默认图标吗？', () => {
+      data.settings.appIcon = null;
+      save();
+      applyAppIcon();
+      toast('已恢复默认图标');
+    });
+  });
+
+  // ---- Init ----
+  load();
+  renderMenu();
+  updateBadges();
+  applyPageBackgrounds();
+  applyAppIcon();
+})();
+</script>
+</body>
+</html>
